@@ -2,13 +2,13 @@
 
 A trimmed Linux 7.2.10 (gentoo-sources) kernel configuration for one laptop, the HP OmniBook 7 14-kh0xxx with a Ryzen AI 9 HX 475. Everything the laptop doesn't have or use is removed: Ethernet, other Wi-Fi vendors, SATA, TV tuners, Intel and SoundWire audio, debugging and tracing, hibernation, kexec, NUMA. Security modules and kernel hardening are removed too, after the owner chose to. The kernel image is 8.4 MB instead of 19.1 MB (measured on 7.2.9: 136 MB more RAM available after boot). The scripts that made it are included, so each removal can be read and repeated on a newer kernel.
 
-**Status:** `7.2.10-gentoo-min-b19` is built and installed (2026-10-16) but not test-booted yet; `7.2.10-gentoo-min-b17` is the kernel in daily use and stays as the fallback. EFI stub, no initramfs.
+**Status:** the running kernel on the target laptop since 2026-10-16 (`7.2.10-gentoo-min-b19`, EFI stub, no initramfs).
 
 ![Terminal output on a dark background, two kernel boot lines. Original kernel: "Memory: 56913620K/58248588K available (23888K kernel code, 5137K rwdata, 10404K rodata, 3344K init, 5540K bss, 1297436K reserved)". This config: "Memory: 57052832K/58248588K available (14789K kernel code, 1867K rwdata, 5800K rodata, 1572K init, 3128K bss, 1173760K reserved)". Then the image sizes: 10826240 bytes for bzImage-min.efi and 19149312 bytes for the original bzImage.efi](docs/images/memory.png)
 
 ## Features
 
-- **`config-7.2.10-gentoo-min-b19`:** the current full `.config`: 1540 options built in, 156 as modules. `config-7.2.10-gentoo-min-b17` is the one before it (in daily use); the 7.2.9 config is in the git history.
+- **`config-7.2.10-gentoo-min-b19`:** the current full `.config`: 1540 options built in, 156 as modules. `config-7.2.10-gentoo-min-b17` is the one before it; the 7.2.9 config is in the git history.
 - **`changes-b19.sh`:** every change from b17 to b19, each with its reason: about −20 MiB of kernel memory (memory encryption pools, NVMe queue depth, memory hotplug, kmalloc hardening caches), the ACPI bus-master check skipped on deep idle, absent hardware, unused features (kexec, DAMON, hugetlbfs, XFS online repair, unused cgroup controllers, netfilter, IBT) and the remaining hardening (stack protector, fortify, Landlock/Yama).
 - **Fast on this CPU:** built for the native CPU (Zen 5), optimized for performance, 1000 Hz timer, lazy preemption, idle-only tickless, CPU vulnerability mitigations compiled out (see Limits).
 - **Boots without an initramfs:** the command line and the AMD CPU microcode are built into the image, and NVMe and XFS are built in, so the EFI firmware starts the kernel directly.
@@ -74,7 +74,8 @@ From the kernel's own boot messages and the image files (original kernel vs this
 
 ## Verification
 
-- `config-7.2.10-gentoo-min-b17` is identical to the daily kernel's `/proc/config.gz`. b19 passed a check that every module and driver in use on b17 is still built (122 checked); its test boot is pending.
+- `config-7.2.10-gentoo-min-b19` is identical to the running kernel's `/proc/config.gz`. Before building, a check confirmed that every module and driver in use on b17 is still built (122 checked).
+- Test boot of b19 (2026-10-16): Wi-Fi, Bluetooth radio and scan, camera picture, speakers and the PDM mic (a 1 kHz tone played on the speakers is picked up by the mic at −54 dB, against −110 dB in silence), s2idle suspend and RTC wake (24 s of a 30 s sleep in S0ix, Wi-Fi back about 1 s after resume), backlight, battery reporting. SSD reads are unchanged from b17 with the shorter NVMe queues (6558 vs 6562 MiB/s sequential, 3730 vs 3750 MiB/s 4 KiB random). 14.4 MB more memory is available at boot than on b17. Bluetooth audio, the headphone jack and the Fn keys weren't checked on this build.
 - Each stage was test-booted once through `BootNext` before replacing the previous one. The final config has been in daily use since: display and GPU (OpenGL games such as Minecraft, hardware video decoding), speakers, Wi-Fi, Bluetooth, and the power plans. The webcam and suspend haven't been checked specifically.
 
 ## Limits
