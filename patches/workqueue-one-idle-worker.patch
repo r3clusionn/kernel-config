@@ -1,0 +1,18 @@
+workqueue: keep one idle worker per pool instead of two
+
+Local patch (debloat batch 24, 2026-10-17). Every per-CPU pool (2 per CPU)
+keeps two idle kworkers forever; one is enough on this laptop. About 48
+fewer kernel threads at idle on 24 CPUs (estimated -1.4 MiB). The only
+cost is creating a worker a little more often under bursty load.
+
+--- a/kernel/workqueue.c
++++ b/kernel/workqueue.c
+@@ -979,7 +979,7 @@
+ 	int nr_idle = pool->nr_idle + managing; /* manager is considered idle */
+ 	int nr_busy = pool->nr_workers - nr_idle;
+ 
+-	return nr_idle > 2 && (nr_idle - 2) * MAX_IDLE_WORKERS_RATIO >= nr_busy;
++	return nr_idle > 1 && (nr_idle - 1) * MAX_IDLE_WORKERS_RATIO >= nr_busy;
+ }
+ 
+ /**

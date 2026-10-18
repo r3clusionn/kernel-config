@@ -1,0 +1,46 @@
+From 12d17b523d3a3e2c59bf125f5ea6f2efbd585ff3 Mon Sep 17 00:00:00 2001
+From: Peter Jung <admin@ptr1337.dev>
+Date: Thu, 17 Aug 2023 13:53:54 +0200
+Subject: [PATCH] Kconfig: Restore CONFIG_OPTIMIZE_FOR_PERFORMANCE_O3
+
+Restores the ability to compile the kernel with -O3 to for more
+aggressive optimizations by the compiler and achieve higher performance.
+
+Signed-off-by: Peter Jung <admin@ptr1337.dev>
+Signed-off-by: Eric Naim <dnaim@cachyos.org>
+---
+ Makefile     | 3 +++
+ init/Kconfig | 6 ++++++
+ 2 files changed, 9 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index 4ad67b737af7ad..ad20691145a020 100644
+--- a/Makefile
++++ b/Makefile
+@@ -932,6 +932,9 @@ KBUILD_CFLAGS	+= -fno-delete-null-pointer-checks
+ ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE
+ KBUILD_CFLAGS += -O2
+ KBUILD_RUSTFLAGS += -Copt-level=2
++else ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3
++KBUILD_CFLAGS += -O3
++KBUILD_RUSTFLAGS += -Copt-level=3
+ else ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+ KBUILD_CFLAGS += -Os
+ KBUILD_RUSTFLAGS += -Copt-level=s
+diff --git a/init/Kconfig b/init/Kconfig
+index 5040dcdc2c8208..410dd57cf6cfb6 100644
+--- a/init/Kconfig
++++ b/init/Kconfig
+@@ -1665,6 +1665,12 @@ config CC_OPTIMIZE_FOR_PERFORMANCE
+ 	  with the "-O2" compiler flag for best performance and most
+ 	  helpful compile-time warnings.
+ 
++config CC_OPTIMIZE_FOR_PERFORMANCE_O3
++	bool "Optimize more for performance (-O3)"
++	help
++	  Choosing this option will pass "-O3" to your compiler to optimize
++	  the kernel yet more for performance.
++
+ config CC_OPTIMIZE_FOR_SIZE
+ 	bool "Optimize for size (-Os)"
+ 	help

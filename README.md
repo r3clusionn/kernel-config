@@ -8,8 +8,10 @@ A trimmed Linux 7.2.10 (gentoo-sources) kernel configuration for one laptop, the
 
 ## Features
 
-- **`config-7.2.10-gentoo-min-b19`:** the current full `.config`: 1540 options built in, 156 as modules. `config-7.2.10-gentoo-min-b17` is the one before it; the 7.2.9 config is in the git history.
-- **`changes-b19.sh`:** every change from b17 to b19, each with its reason: about −20 MiB of kernel memory (memory encryption pools, NVMe queue depth, memory hotplug, kmalloc hardening caches), the ACPI bus-master check skipped on deep idle, absent hardware, unused features (kexec, DAMON, hugetlbfs, XFS online repair, unused cgroup controllers, netfilter, IBT) and the remaining hardening (stack protector, fortify, Landlock/Yama).
+- **`config-7.3.0-rc7-min-b29`:** the current full `.config` (Linux 7.3-rc7): 1564 options built in, 121 as modules, built with Clang 23 (ThinLTO, `-O3`, AutoFDO). The 7.2.10 b17/b19 configs and `changes-b19.sh` are the earlier GCC kernels; see History.
+- **`build-clang.sh`:** the build as used: mainline sources plus `patches/`, the b26 GCC config switched to Clang (`LLVM=1`) with ThinLTO, `-O3`, `AUTOFDO_CLANG`, `TRIM_UNUSED_KSYMS` and TCP BBR, the firmware built in. With a profile argument it builds the AutoFDO-optimized kernel.
+- **`patches/`:** `cs35l41-103c8f2e.patch` (the speakers' CS35L41 amplifier entries, not in mainline 7.3-rc7), `workqueue-one-idle-worker.patch` (each worker pool keeps 1 idle kworker instead of 2), `cachy-O3-kconfig.patch` (CachyOS's `CC_OPTIMIZE_FOR_PERFORMANCE_O3`), `clang-lto-O3.patch` (local: ThinLTO's backends otherwise run at ld.lld's default `--lto-O2`, so `-O3` only reached the pre-link step), and `cachy-poc-selector-v2.6.3.patch` (CachyOS's idle-CPU selector, tried in b28 and turned off in b29, see History).
+- **`autofdo/`:** `kernel.afdo`, the AutoFDO profile b29 was built with, and `workload.sh`, the load it was sampled under.
 - **Fast on this CPU:** built for the native CPU (Zen 5), optimized for performance, 1000 Hz timer, lazy preemption, idle-only tickless, CPU vulnerability mitigations compiled out (see Limits).
 - **Boots without an initramfs:** the command line and the AMD CPU microcode are built into the image, and NVMe and XFS are built in, so the EFI firmware starts the kernel directly.
 - **`trim.sh`:** the non-security removals, grouped and commented (power and wakeups, unused subsystems, workqueue owners, GPU and NPU, audio, absent hardware, debug infrastructure).
@@ -60,7 +62,21 @@ Then compare with `config-7.2.10-gentoo-min-b19` for anything new. To go from a 
   - the CPU vulnerability mitigations (Spectre and similar) are compiled out (`CPU_MITIGATIONS` off) for speed;
   - stack offset randomization and the other defaults stay.
 
+## History
+
+- **b21** (7.2.10): IA32 emulation, user shadow stack, binfmt_misc, `/proc/config.gz` and `/proc/kcore` off; no stack initialization; no swiotlb bounce buffer.
+- **b22:** mainline 7.3-rc7 (the speaker patch is needed on any non-Gentoo tree); a small text console (`video=eDP-1:640x480`) saves the console's framebuffer.
+- **b23–b26:** amdgpu and the 33 drivers that stay loaded built in, every firmware file the laptop loads (GPU, microcode, Wi-Fi, Bluetooth, speakers, `regulatory.db`) in `CONFIG_EXTRA_FIRMWARE`, smaller hash tables, IOMMU and debugfs off, the workqueue patch. No firmware package is installed.
+- **b28:** the b26 config built with Clang 23: ThinLTO, `-O3` (with `--lto-O3`), `-march=native` (znver5), `TRIM_UNUSED_KSYMS`, TCP BBR as default, and CachyOS's POC selector for an A/B test. The POC selector made pipe ping-pong 30% slower for 1–2% elsewhere, so b29 turns it off.
+- **b29:** b28 built with an AutoFDO profile (`-fprofile-sample-use`, `-fsplit-machine-functions`, `--lto-sample-profile`), sampled with `perf record -b` on the branch event `cpu/event=0xc4/k` (Zen 5's 16-entry LBR, no libpfm needed) during a kernel build, file work, a download, emerge, git and X text drawing, plus 10 minutes of normal use, and converted with `llvm-profgen`.
+
 ## Measurements
+
+b29 against b26 (GCC 16, `-O2`, no LTO), same power plan and on AC, median of 3–5 runs: scheduler messaging −10.6%, deleting a 1.8 GB tree −18%, execve −5.4%, fork −2.2%, a tinyconfig kernel build −0.5%, a bare `getppid` syscall +5% (1.6 ns), user-space work unchanged (±2%). The profile's own share (b29 against b28): messaging −5.3%, tree delete −14%. Suspend: S0i3 for 23.7 of 30 s on battery.
+
+The older measurements (GCC kernels):
+
+
 
 From the kernel's own boot messages and the image files (original kernel vs this config):
 

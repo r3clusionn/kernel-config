@@ -1,0 +1,15 @@
+--- a/Makefile	2026-10-18 14:22:04.664986783 -0600
++++ b/Makefile	2026-10-18 14:22:04.665982988 -0600
+@@ -1112,6 +1112,12 @@
+ 
+ # Limit inlining across translation units to reduce binary size
+ KBUILD_LDFLAGS += -mllvm -import-instr-limit=5
++
++# Local: with ThinLTO most optimization runs in the linker's backends, which use
++# ld.lld's default --lto-O2 unless told otherwise, so pass -O3 there too.
++ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3
++KBUILD_LDFLAGS += --lto-O3
++endif
+ endif
+ 
+ ifdef CONFIG_LTO

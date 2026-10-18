@@ -1,0 +1,18 @@
+--- a/sound/hda/codecs/side-codecs/cs35l41_hda_property.c	2026-10-09 23:35:07.478449971 -0600
++++ b/sound/hda/codecs/side-codecs/cs35l41_hda_property.c	2026-10-09 23:35:07.496931667 -0600
+@@ -85,6 +85,7 @@
+ 	{ "103C8C51", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 1000, 4100, 24 },
+ 	{ "103C8CDD", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 1000, 4100, 24 },
+ 	{ "103C8CDE", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 1000, 3900, 24 },
++	{ "103C8F2E", 2, EXTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 0, 0, 0 },
+ 	{ "104312AF", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 1, 2, 0, 1000, 4500, 24 },
+ 	{ "10431433", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 1000, 4500, 24 },
+ 	{ "10431463", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 1000, 4500, 24 },
+@@ -511,6 +512,7 @@
+ 	{ "CSC3551", "103C8C6A", hp_i2c_int_2amp_dual_spkid },
+ 	{ "CSC3551", "103C8CDD", generic_dsd_config },
+ 	{ "CSC3551", "103C8CDE", generic_dsd_config },
++	{ "CSC3551", "103C8F2E", generic_dsd_config },
+ 	{ "CSC3551", "104312AF", generic_dsd_config },
+ 	{ "CSC3551", "10431433", generic_dsd_config },
+ 	{ "CSC3551", "10431463", generic_dsd_config },
