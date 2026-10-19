@@ -1,8 +1,8 @@
 # kernel-config
 
-A trimmed Linux 7.2.10 (gentoo-sources) kernel configuration for one laptop, the HP OmniBook 7 14-kh0xxx with a Ryzen AI 9 HX 475. Everything the laptop doesn't have or use is removed: Ethernet, other Wi-Fi vendors, SATA, TV tuners, Intel and SoundWire audio, debugging and tracing, hibernation, kexec, NUMA. Security modules and kernel hardening are removed too, after the owner chose to. The kernel image is 8.4 MB instead of 19.1 MB (measured on 7.2.9: 136 MB more RAM available after boot). The scripts that made it are included, so each removal can be read and repeated on a newer kernel.
+A trimmed Linux kernel configuration (now mainline 7.3-rc7, built with Clang) for one laptop, the HP OmniBook 7 14-kh0xxx with a Ryzen AI 9 HX 475. Everything the laptop doesn't have or use is removed: Ethernet, other Wi-Fi vendors, SATA, TV tuners, Intel and SoundWire audio, debugging and tracing, hibernation, kexec, NUMA. Security modules and kernel hardening are removed too, after the owner chose to. The GCC image was 8.4 MB instead of 19.1 MB (measured on 7.2.9: 136 MB more RAM available after boot); since b23 amdgpu and every firmware file the laptop loads are built in, so b29's image is 15.7 MB and no firmware package is installed. The scripts that made it are included, so each removal can be read and repeated on a newer kernel.
 
-**Status:** the running kernel on the target laptop since 2026-10-16 (`7.2.10-gentoo-min-b19`, EFI stub, no initramfs).
+**Status:** the running kernel on the target laptop since 2026-10-18 (`7.3.0-rc7-min-b29`, Clang 23 ThinLTO `-O3` with AutoFDO, EFI stub, no initramfs), and the only kernel installed.
 
 ![Terminal output on a dark background, two kernel boot lines. Original kernel: "Memory: 56913620K/58248588K available (23888K kernel code, 5137K rwdata, 10404K rodata, 3344K init, 5540K bss, 1297436K reserved)". This config: "Memory: 57052832K/58248588K available (14789K kernel code, 1867K rwdata, 5800K rodata, 1572K init, 3128K bss, 1173760K reserved)". Then the image sizes: 10826240 bytes for bzImage-min.efi and 19149312 bytes for the original bzImage.efi](docs/images/memory.png)
 
@@ -20,7 +20,9 @@ A trimmed Linux 7.2.10 (gentoo-sources) kernel configuration for one laptop, the
 
 ## How to install
 
-Requires gentoo-sources 7.2.10 (or a close version) and the speaker patch from [omnibook7-speakers](https://github.com/r3clusionn/omnibook7-speakers) in `/etc/portage/patches/sys-kernel/gentoo-sources/`.
+The current kernel (b29) is built by `build-clang.sh`: linux-7.2 plus the 7.3-rc7 patch and `patches/`, with Clang 23 (`LLVM=1`). Its paths are this laptop's work directories, so set `K`, `BASE`, `FW` and `KP` at the top first. `sh build-clang.sh` builds without a profile (b28), `sh build-clang.sh autofdo/kernel.afdo` builds b29.
+
+The earlier GCC kernels (b19 and before) were built from gentoo-sources 7.2.10 with the speaker patch from [omnibook7-speakers](https://github.com/r3clusionn/omnibook7-speakers) in `/etc/portage/patches/sys-kernel/gentoo-sources/`.
 
 ```sh
 doas emerge -1 sys-kernel/gentoo-sources
@@ -82,7 +84,7 @@ From the kernel's own boot messages and the image files (original kernel vs this
 
 | | Original | This config |
 |---|---|---|
-| EFI image | 19.1 MB | 10.8 MB (7.2.9), 10.7 MB (7.2.10 b17), 8.4 MB (7.2.10 b19) |
+| EFI image | 19.1 MB | 10.8 MB (7.2.9), 10.7 MB (7.2.10 b17), 8.4 MB (7.2.10 b19), 15.7 MB (7.3-rc7 b29, amdgpu and firmware built in) |
 | Kernel code | 23888 kB | 14789 kB |
 | Read-only data | 10404 kB | 5800 kB |
 | Reserved at boot | 1297436 kB | 1173760 kB |
