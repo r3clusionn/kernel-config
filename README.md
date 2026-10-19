@@ -35,7 +35,7 @@ doas sh /path/to/install.sh        # modules + EFI image, boots it once
 
 Before building, change the built-in command line (`CONFIG_CMDLINE`) to your root partition: it holds this laptop's `root=PARTUUID=…` and `rootfstype=xfs`. Also check `CONFIG_EXTRA_FIRMWARE`, which needs `amd-ucode/microcode_amd_fam1ah.bin` from linux-firmware.
 
-`install.sh` expects an EFI boot entry named `Gentoo-min` pointing at `\EFI\Gentoo\bzImage-min.efi`. Create it once with `efibootmgr`. Make it the default only after the test boot works.
+`install.sh` expects an EFI boot entry named `Gentoo-min` pointing at `\EFI\Gentoo\bzImage-min.efi`. Create it once with `efibootmgr`, or copy an existing entry with [efi-entry](https://github.com/r3clusionn/efi-entry), which also makes the one-time test entries the b23–b29 builds used. Make it the default only after the test boot works.
 
 ## How to use
 
